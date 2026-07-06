@@ -1,0 +1,11 @@
+# Use official OpenJDK image
+FROM eclipse-temurin:21-jdk
+
+# Set working directory
+WORKDIR /app
+
+# Copy jar file
+COPY target/app-1.0.0.jar app.jar
+
+# Run application
+ENTRYPOINT ["java", "-jar", "app.jar"]
