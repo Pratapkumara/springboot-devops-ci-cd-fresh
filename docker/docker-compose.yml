@@ -5,15 +5,16 @@ services:
       context: ../app
       dockerfile: Dockerfile
     container_name: springboot-app
-    expose:
-      - "8080"
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
     networks:
       - devops-network
-
 
   jenkins:
     image: jenkins/jenkins:lts-jdk21
     container_name: jenkins
+    restart: unless-stopped
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -23,10 +24,10 @@ services:
     networks:
       - devops-network
 
-
   sonarqube:
     image: sonarqube:lts-community
     container_name: sonarqube
+    restart: unless-stopped
     ports:
       - "9000:9000"
     environment:
@@ -38,10 +39,10 @@ services:
     networks:
       - devops-network
 
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -52,10 +53,10 @@ services:
     networks:
       - devops-network
 
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
@@ -66,10 +67,10 @@ services:
     networks:
       - devops-network
 
-
   alertmanager:
     image: prom/alertmanager:latest
     container_name: alertmanager
+    restart: unless-stopped
     ports:
       - "9093:9093"
     volumes:
@@ -79,26 +80,9 @@ services:
     networks:
       - devops-network
 
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - "8081:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - app
-    networks:
-      - devops-network
-
-
-
 networks:
   devops-network:
     driver: bridge
-
-
 
 volumes:
   jenkins_home:
