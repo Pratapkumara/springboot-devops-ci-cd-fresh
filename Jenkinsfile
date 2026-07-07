@@ -8,7 +8,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
@@ -17,9 +17,20 @@ pipeline {
         stage('Build Maven') {
             steps {
                 dir('app') {
-                    sh 'chmod +x mvnw || true'
-                    sh './mvnw clean package -DskipTests || mvn clean package -DskipTests'
+                    sh 'mvn clean package -DskipTests'
                 }
+            }
+        }
+
+        stage('Docker Debug') {
+            steps {
+                sh '''
+                    whoami
+                    id
+                    ls -l /var/run/docker.sock || true
+                    docker version
+                    docker ps
+                '''
             }
         }
 
@@ -34,8 +45,8 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 sh '''
-                docker rm -f springboot-app || true
-                docker run -d --name springboot-app -p 8081:8080 ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker rm -f springboot-app || true
+                    docker run -d --name springboot-app -p 8081:8080 ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
@@ -43,11 +54,15 @@ pipeline {
 
     post {
         success {
-            echo 'Build Successful'
+            echo '✅ Build Successful'
         }
 
         failure {
-            echo 'Build Failed'
+            echo '❌ Build Failed'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
