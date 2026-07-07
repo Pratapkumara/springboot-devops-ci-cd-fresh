@@ -10,7 +10,8 @@ pipeline {
     environment {
 
         IMAGE_NAME = "devops-app"
-        IMAGE_TAG = "1.0"
+        IMAGE_TAG  = "1.0"
+
         SCANNER_HOME = tool 'sonar-scanner'
 
     }
@@ -26,6 +27,7 @@ pipeline {
                 checkout scm
 
             }
+
         }
 
 
@@ -37,11 +39,11 @@ pipeline {
                 dir('app') {
 
                     sh '''
-                    echo "Building Application"
+                    echo "Building Spring Boot Application"
 
                     mvn clean package -DskipTests
 
-                    echo "Checking Jar"
+                    echo "Checking Build Artifact"
 
                     ls -lh target/*.jar
                     '''
@@ -65,11 +67,15 @@ pipeline {
 
                         sh '''
 
+                        echo "Running SonarQube Analysis"
+
+
                         ${SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=devops-app \
                         -Dsonar.projectName=devops-app \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes
+
 
                         '''
 
@@ -80,7 +86,6 @@ pipeline {
             }
 
         }
-
 
 
 
@@ -113,10 +118,13 @@ pipeline {
 
                     echo "Building Docker Image"
 
+
                     docker build \
                     -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
+
                     docker images | grep ${IMAGE_NAME}
+
 
                     '''
 
@@ -130,19 +138,21 @@ pipeline {
 
 
 
-        stage('Trivy Scan') {
+        stage('Trivy Security Scan') {
 
             steps {
 
                 sh '''
 
-                echo "Security Scan"
+                echo "Scanning Docker Image"
+
 
                 trivy image \
                 --no-progress \
                 --severity HIGH,CRITICAL \
                 --exit-code 1 \
                 ${IMAGE_NAME}:${IMAGE_TAG}
+
 
                 '''
 
@@ -160,13 +170,14 @@ pipeline {
 
                 sh '''
 
-                echo "Removing old container"
+                echo "Removing old application container"
+
 
                 docker rm -f springboot-app || true
 
 
 
-                echo "Starting Application"
+                echo "Starting Spring Boot Container"
 
 
 
@@ -178,11 +189,12 @@ pipeline {
 
 
 
+                echo "Waiting for application"
+
+
                 sleep 20
 
 
-
-                echo "Container Status"
 
                 docker ps | grep springboot-app
 
@@ -190,7 +202,9 @@ pipeline {
 
                 echo "Application Logs"
 
+
                 docker logs --tail 50 springboot-app
+
 
 
                 '''
@@ -204,21 +218,29 @@ pipeline {
 
 
 
+
+
     post {
 
 
         success {
 
-            echo "CI/CD Pipeline Completed Successfully 🚀"
+            echo "================================="
+            echo "CI/CD Pipeline Successful 🚀"
+            echo "================================="
 
         }
+
 
 
         failure {
 
+            echo "================================="
             echo "CI/CD Pipeline Failed ❌"
+            echo "================================="
 
         }
+
 
 
         always {
@@ -227,6 +249,8 @@ pipeline {
 
         }
 
+
     }
+
 
 }
