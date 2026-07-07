@@ -147,16 +147,45 @@ pipeline {
 
 
 
-                echo "Checking container..."
+                echo "Checking container status..."
 
-                sleep 30
+                sleep 5
 
-                docker ps | grep springboot-app
+                docker ps | grep springboot-app || {
+                    echo "Container failed to start"
+                    docker logs springboot-app
+                    exit 1
+                }
 
 
-                echo "Application Health Check..."
 
-                curl -f http://localhost:8081 || exit 1
+                echo "Waiting for Application Startup..."
+
+                for i in {1..12}
+                do
+
+                    if curl -f http://localhost:8081
+                    then
+
+                        echo "Application is UP ✅"
+                        exit 0
+
+                    fi
+
+
+                    echo "Waiting... attempt $i/12"
+
+                    sleep 5
+
+                done
+
+
+
+                echo "Application failed to start ❌"
+
+                docker logs springboot-app
+
+                exit 1
 
 
                 '''
