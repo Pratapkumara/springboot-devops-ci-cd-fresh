@@ -30,7 +30,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('app') {
-                    withSonarQubeEnv('sonar-server') {
+                    withSonarQubeEnv('sonarqube') {
                         sh """
                         ${SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=devops-app \
@@ -51,17 +51,6 @@ pipeline {
             }
         }
 
-        stage('Docker Debug') {
-            steps {
-                sh '''
-                    whoami
-                    id
-                    docker version
-                    docker ps
-                '''
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 dir('app') {
@@ -73,18 +62,21 @@ pipeline {
         stage('Trivy Image Scan') {
             steps {
                 sh '''
-                    trivy image --no-progress --exit-code 0 --severity LOW,MEDIUM,HIGH ${IMAGE_NAME}:${IMAGE_TAG}
+                trivy image --no-progress --exit-code 0 --severity LOW,MEDIUM,HIGH ${IMAGE_NAME}:${IMAGE_TAG}
 
-                    trivy image --no-progress --exit-code 1 --severity CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
+                trivy image --no-progress --exit-code 1 --severity CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Deploy Container') {
             steps {
                 sh '''
-                    docker rm -f springboot-app || true
-                    docker run -d --name springboot-app -p 8081:8080 ${IMAGE_NAME}:${IMAGE_TAG}
+                docker rm -f springboot-app || true
+                docker run -d \
+                --name springboot-app \
+                -p 8081:8080 \
+                ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
