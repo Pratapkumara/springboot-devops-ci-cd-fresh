@@ -1,9 +1,14 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'maven3'
+    }
+
     environment {
         IMAGE_NAME = "devops-app"
         IMAGE_TAG = "1.0"
+        SCANNER_HOME = tool 'sonar-scanner'
     }
 
     stages {
@@ -22,12 +27,35 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                dir('app') {
+                    withSonarQubeEnv('sonar-server') {
+                        sh '''
+                        ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=devops-app \
+                        -Dsonar.projectName=devops-app \
+                        -Dsonar.sources=src \
+                        -Dsonar.java.binaries=target/classes
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
         stage('Docker Debug') {
             steps {
                 sh '''
                     whoami
                     id
-                    ls -l /var/run/docker.sock || true
                     docker version
                     docker ps
                 '''
