@@ -4,17 +4,16 @@ pipeline {
 
 
     tools {
-
         maven 'maven3'
         jdk 'JDK21'
-
     }
 
 
     environment {
 
-        IMAGE_NAME = "devops-app"
+        IMAGE_NAME = "pratapkumar1/devops-app"
         IMAGE_TAG = "1.2"
+
         CONTAINER_NAME = "devops-app-container"
 
         SONAR_PROJECT_KEY = "devops-app"
@@ -43,6 +42,7 @@ pipeline {
 
 
 
+
         stage('Build Maven') {
 
             steps {
@@ -53,12 +53,10 @@ pipeline {
 
                     echo "Building Spring Boot Application"
 
-
                     mvn clean package -DskipTests
 
 
-                    echo "Checking Jar File"
-
+                    echo "Checking Jar"
 
                     ls -lh target/*.jar
 
@@ -74,12 +72,9 @@ pipeline {
 
         stage('SonarQube Analysis') {
 
-
             steps {
 
-
                 dir('app') {
-
 
                     withSonarQubeEnv('sonar-server') {
 
@@ -108,20 +103,14 @@ pipeline {
 
         stage('Quality Gate') {
 
-
             steps {
-
 
                 timeout(time: 15, unit: 'MINUTES') {
 
-
                     waitForQualityGate abortPipeline: true
 
-
                 }
-
             }
-
         }
 
 
@@ -131,12 +120,9 @@ pipeline {
 
         stage('Docker Build') {
 
-
             steps {
 
-
                 dir('app') {
-
 
                     sh '''
 
@@ -161,6 +147,53 @@ pipeline {
 
 
 
+        stage('Docker Push') {
+
+
+            steps {
+
+
+                withCredentials([
+
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+
+                ]) {
+
+
+                    sh '''
+
+                    echo "Login Docker Hub"
+
+
+                    echo $DOCKER_PASS | docker login \
+                    -u $DOCKER_USER \
+                    --password-stdin
+
+
+
+                    echo "Pushing Image"
+
+
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+
+
+                    '''
+
+                }
+
+            }
+        }
+
+
+
+
+
+
+
         stage('Trivy Security Scan') {
 
 
@@ -169,7 +202,7 @@ pipeline {
 
                 sh '''
 
-                echo "Running Trivy Security Scan"
+                echo "Running Trivy Scan"
 
 
                 trivy image \
@@ -179,6 +212,7 @@ pipeline {
 
 
                 '''
+
             }
         }
 
@@ -213,13 +247,14 @@ pipeline {
 
 
 
-                echo "Application Started"
+                echo "Application Running"
 
 
                 docker ps
 
 
                 '''
+
             }
         }
 
@@ -242,7 +277,7 @@ pipeline {
 
         failure {
 
-            echo "❌ CI/CD Pipeline Failed"
+            echo "❌ Pipeline Failed"
 
         }
 
@@ -252,6 +287,7 @@ pipeline {
             cleanWs()
 
         }
+
 
     }
 
