@@ -2,19 +2,24 @@ pipeline {
 
     agent any
 
+
     tools {
+
         jdk 'jdk21'
         maven 'maven3'
+
     }
+
 
     environment {
 
         IMAGE_NAME = "devops-app"
-        IMAGE_TAG  = "1.0"
+        IMAGE_TAG = "1.0"
 
         SCANNER_HOME = tool 'sonar-scanner'
 
     }
+
 
 
     stages {
@@ -39,13 +44,17 @@ pipeline {
                 dir('app') {
 
                     sh '''
+
                     echo "Building Spring Boot Application"
 
                     mvn clean package -DskipTests
 
-                    echo "Checking Build Artifact"
+
+                    echo "Checking Artifact"
 
                     ls -lh target/*.jar
+
+
                     '''
 
                 }
@@ -63,11 +72,13 @@ pipeline {
 
                 dir('app') {
 
+
                     withSonarQubeEnv('Sonar-Qube') {
+
 
                         sh '''
 
-                        echo "Running SonarQube Analysis"
+                        echo "Starting SonarQube Scan"
 
 
                         ${SCANNER_HOME}/bin/sonar-scanner \
@@ -79,28 +90,39 @@ pipeline {
 
                         '''
 
+
                     }
+
 
                 }
 
+
             }
+
 
         }
 
 
 
 
+
         stage('Quality Gate') {
+
 
             steps {
 
+
                 timeout(time: 5, unit: 'MINUTES') {
+
 
                     waitForQualityGate abortPipeline: true
 
+
                 }
 
+
             }
+
 
         }
 
@@ -110,9 +132,12 @@ pipeline {
 
         stage('Docker Build') {
 
+
             steps {
 
+
                 dir('app') {
+
 
                     sh '''
 
@@ -128,9 +153,12 @@ pipeline {
 
                     '''
 
+
                 }
 
+
             }
+
 
         }
 
@@ -140,11 +168,13 @@ pipeline {
 
         stage('Trivy Security Scan') {
 
+
             steps {
+
 
                 sh '''
 
-                echo "Scanning Docker Image"
+                echo "Running Trivy Scan"
 
 
                 trivy image \
@@ -156,7 +186,9 @@ pipeline {
 
                 '''
 
+
             }
+
 
         }
 
@@ -166,18 +198,21 @@ pipeline {
 
         stage('Deploy Application') {
 
+
             steps {
+
 
                 sh '''
 
-                echo "Removing old application container"
+
+                echo "Stopping Old Container"
 
 
                 docker rm -f springboot-app || true
 
 
 
-                echo "Starting Spring Boot Container"
+                echo "Starting New Container"
 
 
 
@@ -189,11 +224,14 @@ pipeline {
 
 
 
-                echo "Waiting for application"
+                echo "Waiting For Application"
 
 
                 sleep 20
 
+
+
+                echo "Container Status"
 
 
                 docker ps | grep springboot-app
@@ -209,13 +247,15 @@ pipeline {
 
                 '''
 
+
             }
+
 
         }
 
 
-    }
 
+    }
 
 
 
@@ -225,9 +265,9 @@ pipeline {
 
         success {
 
-            echo "================================="
-            echo "CI/CD Pipeline Successful 🚀"
-            echo "================================="
+
+            echo "CI/CD Pipeline Completed Successfully 🚀"
+
 
         }
 
@@ -235,9 +275,9 @@ pipeline {
 
         failure {
 
-            echo "================================="
+
             echo "CI/CD Pipeline Failed ❌"
-            echo "================================="
+
 
         }
 
@@ -245,7 +285,9 @@ pipeline {
 
         always {
 
+
             cleanWs()
+
 
         }
 
