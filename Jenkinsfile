@@ -31,13 +31,13 @@ pipeline {
             steps {
                 dir('app') {
                     withSonarQubeEnv('sonar-server') {
-                        sh '''
+                        sh """
                         ${SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=devops-app \
                         -Dsonar.projectName=devops-app \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes
-                        '''
+                        """
                     }
                 }
             }
@@ -67,6 +67,16 @@ pipeline {
                 dir('app') {
                     sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
                 }
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh '''
+                    trivy image --no-progress --exit-code 0 --severity LOW,MEDIUM,HIGH ${IMAGE_NAME}:${IMAGE_TAG}
+
+                    trivy image --no-progress --exit-code 1 --severity CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
 
