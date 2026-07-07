@@ -50,9 +50,9 @@ pipeline {
                     mvn clean package -DskipTests
 
 
-                    echo "Checking Artifact"
+                    echo "Checking Jar"
 
-                    ls -lh target/*.jar
+                    ls -lh target/app-1.0.0.jar
 
 
                     '''
@@ -66,6 +66,7 @@ pipeline {
 
 
 
+
         stage('SonarQube Analysis') {
 
             steps {
@@ -73,12 +74,12 @@ pipeline {
                 dir('app') {
 
 
-                    withSonarQubeEnv('Sonar-Qube') {
+                    withSonarQubeEnv('sonar-server') {
 
 
                         sh '''
 
-                        echo "Starting SonarQube Scan"
+                        echo "Running SonarQube Scan"
 
 
                         ${SCANNER_HOME}/bin/sonar-scanner \
@@ -93,12 +94,9 @@ pipeline {
 
                     }
 
-
                 }
 
-
             }
-
 
         }
 
@@ -108,9 +106,7 @@ pipeline {
 
         stage('Quality Gate') {
 
-
             steps {
-
 
                 timeout(time: 5, unit: 'MINUTES') {
 
@@ -120,9 +116,7 @@ pipeline {
 
                 }
 
-
             }
-
 
         }
 
@@ -131,7 +125,6 @@ pipeline {
 
 
         stage('Docker Build') {
-
 
             steps {
 
@@ -153,12 +146,9 @@ pipeline {
 
                     '''
 
-
                 }
 
-
             }
-
 
         }
 
@@ -168,13 +158,12 @@ pipeline {
 
         stage('Trivy Security Scan') {
 
-
             steps {
 
 
                 sh '''
 
-                echo "Running Trivy Scan"
+                echo "Trivy Scan"
 
 
                 trivy image \
@@ -186,9 +175,7 @@ pipeline {
 
                 '''
 
-
             }
-
 
         }
 
@@ -205,57 +192,46 @@ pipeline {
                 sh '''
 
 
-                echo "Stopping Old Container"
+                echo "Removing old container"
 
 
                 docker rm -f springboot-app || true
 
 
 
-                echo "Starting New Container"
+                echo "Starting Application"
 
 
 
                 docker run -d \
                 --name springboot-app \
-                --restart unless-stopped \
+                --restart always \
                 -p 8081:8080 \
                 ${IMAGE_NAME}:${IMAGE_TAG}
 
-
-
-                echo "Waiting For Application"
 
 
                 sleep 20
 
 
 
-                echo "Container Status"
-
-
                 docker ps | grep springboot-app
 
 
 
-                echo "Application Logs"
-
-
-                docker logs --tail 50 springboot-app
+                echo "Application Started 🚀"
 
 
 
                 '''
 
-
             }
-
 
         }
 
 
-
     }
+
 
 
 
@@ -265,9 +241,7 @@ pipeline {
 
         success {
 
-
             echo "CI/CD Pipeline Completed Successfully 🚀"
-
 
         }
 
@@ -275,9 +249,7 @@ pipeline {
 
         failure {
 
-
             echo "CI/CD Pipeline Failed ❌"
-
 
         }
 
@@ -285,9 +257,7 @@ pipeline {
 
         always {
 
-
             cleanWs()
-
 
         }
 
