@@ -1,9 +1,11 @@
+```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -12,13 +14,17 @@
         <relativePath/>
     </parent>
 
+
     <groupId>com.devops</groupId>
     <artifactId>app</artifactId>
     <version>1.0.0</version>
+
     <packaging>jar</packaging>
 
+
     <name>devops-monitoring-app</name>
-    <description>Spring Boot DevOps CI/CD Application</description>
+    <description>Spring Boot DevOps CI/CD Monitoring Application</description>
+
 
     <properties>
         <java.version>21</java.version>
@@ -27,27 +33,27 @@
 
     <dependencies>
 
-        <!-- Spring Boot Web -->
+
+        <!-- Spring Boot REST API -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
 
-        <!-- Force Tomcat Security Fix Version -->
+
+        <!-- Tomcat Security Fix -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
             <version>10.1.55</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-el</artifactId>
             <version>10.1.55</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
@@ -56,18 +62,21 @@
         </dependency>
 
 
-        <!-- Actuator Monitoring -->
+
+        <!-- Spring Boot Actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
 
-        <!-- Prometheus Metrics -->
+
+        <!-- Prometheus Metrics Exporter -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+
 
 
         <!-- Testing -->
@@ -81,7 +90,9 @@
     </dependencies>
 
 
+
     <build>
+
         <plugins>
 
             <plugin>
@@ -90,7 +101,9 @@
             </plugin>
 
         </plugins>
+
     </build>
 
 
 </project>
+```
