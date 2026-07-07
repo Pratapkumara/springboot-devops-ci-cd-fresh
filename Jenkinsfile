@@ -22,9 +22,7 @@ pipeline {
         stage('Checkout Code') {
 
             steps {
-
                 checkout scm
-
             }
         }
 
@@ -38,9 +36,10 @@ pipeline {
 
                     sh '''
                     mvn clean package -DskipTests
-                    ls -lh target/
-                    '''
 
+                    echo "Checking Build Artifact..."
+                    ls -lh target/app-1.0.0.jar
+                    '''
                 }
             }
         }
@@ -56,13 +55,11 @@ pipeline {
                     withSonarQubeEnv('sonar-server') {
 
                         sh """
-
                         ${SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=devops-app \
                         -Dsonar.projectName=devops-app \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes
-
                         """
                     }
                 }
@@ -97,11 +94,13 @@ pipeline {
                     docker build --no-cache \
                     -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
-                    """
+                    docker images | grep ${IMAGE_NAME}
 
+                    """
                 }
             }
         }
+
 
 
 
@@ -113,15 +112,16 @@ pipeline {
                 sh '''
 
                 trivy image \
+                --skip-version-check \
                 --no-progress \
                 --exit-code 1 \
                 --severity CRITICAL \
                 ${IMAGE_NAME}:${IMAGE_TAG}
 
                 '''
-
             }
         }
+
 
 
 
@@ -132,8 +132,12 @@ pipeline {
 
                 sh '''
 
+                echo "Stopping old container..."
+
                 docker rm -f springboot-app || true
 
+
+                echo "Starting new container..."
 
                 docker run -d \
                 --name springboot-app \
@@ -142,10 +146,20 @@ pipeline {
                 ${IMAGE_NAME}:${IMAGE_TAG}
 
 
+
+                echo "Checking container..."
+
+                sleep 10
+
                 docker ps | grep springboot-app
 
-                '''
 
+                echo "Application Health Check..."
+
+                curl -f http://localhost:8081 || exit 1
+
+
+                '''
             }
         }
 
@@ -159,14 +173,14 @@ pipeline {
 
         success {
 
-            echo '✅ Build Successful - CI/CD Pipeline Completed'
+            echo '✅ CI/CD Pipeline Completed Successfully 🚀'
 
         }
 
 
         failure {
 
-            echo '❌ Pipeline Failed'
+            echo '❌ CI/CD Pipeline Failed'
 
         }
 
