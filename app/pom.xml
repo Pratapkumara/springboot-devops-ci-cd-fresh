@@ -22,22 +22,41 @@
 
     <properties>
         <java.version>21</java.version>
-
-        <!-- Fix Tomcat security vulnerabilities -->
-        <tomcat.version>10.1.55</tomcat.version>
     </properties>
 
 
     <dependencies>
 
-        <!-- Spring Boot Web Application -->
+        <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
 
-        <!-- Application Monitoring -->
+        <!-- Force Tomcat Security Fix Version -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>10.1.55</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-el</artifactId>
+            <version>10.1.55</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>10.1.55</version>
+        </dependency>
+
+
+        <!-- Actuator Monitoring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -51,7 +70,7 @@
         </dependency>
 
 
-        <!-- Test Dependency -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
