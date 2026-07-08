@@ -1,29 +1,29 @@
-```yaml
 spring:
   application:
     name: devops-monitoring-app
 
-
 server:
   port: 8080
 
-
-
 management:
-
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
-
+        include: "*"
 
   endpoint:
     health:
       show-details: always
-
+    prometheus:
+      enabled: true
 
   metrics:
     export:
       prometheus:
         enabled: true
-```
+
+info:
+  app:
+    name: DevOps Monitoring App
+    version: 1.0.0
+    description: Spring Boot CI/CD Monitoring Application
