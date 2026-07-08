@@ -1,297 +1,291 @@
+# 🚀 End-to-End DevOps CI/CD Pipeline for Spring Boot Application
 
-# 🚀 DevOps Spring Boot Docker CI/CD Project
+![Java](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-3.x-brightgreen)
+![Maven](https://img.shields.io/badge/Maven-Build-red)
+![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-blue)
+![Docker](https://img.shields.io/badge/Docker-Container-2496ED)
+![SonarQube](https://img.shields.io/badge/SonarQube-Code%20Quality-green)
+![Trivy](https://img.shields.io/badge/Trivy-Security-blueviolet)
+![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-orange)
+![Grafana](https://img.shields.io/badge/Grafana-Dashboard-F46800)
+![AWS](https://img.shields.io/badge/AWS-EC2-yellow)
 
-## 📌 Project Overview
+---
 
-This project demonstrates a complete end-to-end DevOps CI/CD workflow using a Spring Boot application.
+# 📌 Project Overview
 
-The application is containerized using Docker and automated through Jenkins Pipeline with code quality analysis, security scanning, and automatic deployment.
+This project demonstrates a complete **DevOps CI/CD pipeline** for a Spring Boot application using Jenkins, Docker, SonarQube, Trivy, Prometheus, Grafana, and AWS EC2.
 
-The project covers the complete software delivery lifecycle:
-
-Code Commit → Build → Code Quality → Security Scan → Docker Build → Deployment → Health Check
-
+The pipeline automatically builds the application, performs static code analysis, checks the quality gate, creates a Docker image, pushes it to Docker Hub, scans it for vulnerabilities, and deploys the latest version automatically.
 
 ---
 
 # 🏗️ Architecture
 
-
+```
 Developer
-   |
-   |
+      │
+      ▼
  GitHub Repository
-   |
-   |
- Jenkins CI/CD Pipeline
-   |
-   |---- Maven Build
-   |
-   |---- SonarQube Analysis
-   |
-   |---- Quality Gate Check
-   |
-   |---- Docker Image Build
-   |
-   |---- Trivy Security Scan
-   |
-   |---- Deploy Docker Container
-   |
-   |
- Spring Boot Application
-
+      │
+      ▼
+ Jenkins Pipeline
+      │
+      ├───────────────► Maven Build
+      │
+      ├───────────────► SonarQube Analysis
+      │
+      ├───────────────► Quality Gate
+      │
+      ├───────────────► Docker Build
+      │
+      ├───────────────► Docker Hub Push
+      │
+      ├───────────────► Trivy Security Scan
+      │
+      ▼
+ Deploy Spring Boot Container
+      │
+      ▼
+ Monitoring
+      ├──► Prometheus
+      ├──► Grafana
+      └──► Alertmanager
+```
 
 ---
 
 # 🛠️ Tech Stack
 
-## Application
 - Java 21
-- Spring Boot 3.x
+- Spring Boot
 - Maven
-
-## DevOps Tools
 - Git & GitHub
 - Jenkins
-- Docker
 - SonarQube
+- Docker
+- Docker Hub
 - Trivy
-
-## Deployment
-- Docker Container
-- Linux Server (Ubuntu)
-
+- Prometheus
+- Grafana
+- Alertmanager
+- Nginx
+- AWS EC2
+- Linux (Ubuntu)
 
 ---
 
-# 📁 Project Structure
-
+# 📂 Project Structure
 
 ```
-
-springboot-devops-ci-cd-fresh
+springboot-devops-ci-cd-fresh/
 │
-├── app
-│   ├── src
-│   ├── pom.xml
+├── app/
+│   ├── src/
 │   ├── Dockerfile
-│   └── target
+│   ├── pom.xml
+│   └── Jenkinsfile
 │
-├── Jenkinsfile
+├── docker/
+│   ├── docker-compose.yml
+│   ├── prometheus.yml
+│   └── alertmanager.yml
 │
 └── README.md
-
-````
-
+```
 
 ---
 
-# 🚀 Run Application Locally
+# ⚙️ CI/CD Pipeline Stages
 
+## 1️⃣ Checkout Source Code
 
-### 1. Clone Repository
+- Pull latest code from GitHub
 
-```bash
-git clone https://github.com/Pratapkumara/springboot-devops-ci-cd-fresh.git
+---
 
-cd springboot-devops-ci-cd-fresh/app
-````
+## 2️⃣ Maven Build
 
-### 2. Build Spring Boot Application
-
-```bash
+```
 mvn clean package
 ```
 
-### 3. Build Docker Image
+Builds the Spring Boot application.
 
-```bash
-docker build -t devops-app:1.0 .
+---
+
+## 3️⃣ SonarQube Analysis
+
+- Static Code Analysis
+- Bug Detection
+- Code Smells
+- Security Hotspots
+- Maintainability
+
+---
+
+## 4️⃣ Quality Gate
+
+Pipeline continues only if the Quality Gate passes.
+
+---
+
+## 5️⃣ Docker Build
+
+```
+docker build -t pratapkumar1/devops-app:1.2 .
 ```
 
-### 4. Run Docker Container
+Creates Docker image.
 
-```bash
-docker run -d \
--p 8080:8080 \
---name devops-app \
-devops-app:1.0
-```
+---
 
-### Application URL
+## 6️⃣ Docker Push
+
+Push image to Docker Hub.
 
 ```
-http://localhost:8080
-```
-
-Expected Output:
-
-```
-DevOps App is Running 🚀
+docker push pratapkumar1/devops-app:1.2
 ```
 
 ---
 
-# 🔄 CI/CD Pipeline Workflow
+## 7️⃣ Trivy Security Scan
 
-Every code push triggers Jenkins pipeline:
+Scans Docker image for
+
+- HIGH vulnerabilities
+- CRITICAL vulnerabilities
+
+---
+
+## 8️⃣ Deployment
+
+Automatically deploys latest image
+
+```
+docker run -d \
+--name devops-app-container \
+-p 8082:8080 \
+pratapkumar1/devops-app:1.2
+```
+
+---
+
+## 9️⃣ Monitoring
+
+Application metrics are collected by
+
+- Prometheus
+
+Visualized using
+
+- Grafana
+
+Alerts handled by
+
+- Alertmanager
+
+---
+
+# 🚀 Pipeline Workflow
 
 ```
 GitHub Push
-
-      ↓
-
-Jenkins Pipeline
-
-      ↓
-
-Maven Build
-
-      ↓
-
-SonarQube Code Analysis
-
-      ↓
-
-Quality Gate Validation
-
-      ↓
-
-Docker Image Build
-
-      ↓
-
-Trivy Security Scan
-
-      ↓
-
-Deploy Container
-
-      ↓
-
-Application Health Check
-
-      ↓
-
-Application Running 🚀
-
+      │
+      ▼
+ Jenkins
+      │
+      ▼
+ Maven Build
+      │
+      ▼
+ SonarQube Scan
+      │
+      ▼
+ Quality Gate
+      │
+      ▼
+ Docker Build
+      │
+      ▼
+ Docker Hub Push
+      │
+      ▼
+ Trivy Scan
+      │
+      ▼
+ Deploy
+      │
+      ▼
+ Monitoring
 ```
 
 ---
 
-# 🔍 Pipeline Stages
+# 📊 Monitoring Stack
 
-## 1. Checkout Code
-
-Jenkins automatically pulls the latest source code from GitHub.
-
-## 2. Maven Build
-
-Creates executable Spring Boot JAR file.
-
-```bash
-mvn clean package -DskipTests
-```
-
-## 3. SonarQube Analysis
-
-Checks:
-
-* Code Quality
-* Bugs
-* Vulnerabilities
-* Code Smells
-
-## 4. Quality Gate
-
-Pipeline continues only when SonarQube Quality Gate passes.
-
-## 5. Docker Build
-
-Creates Docker image:
-
-```
-devops-app:1.2
-```
-
-## 6. Trivy Security Scan
-
-Scans Docker image for vulnerabilities.
-
-Current Result:
-
-```
-Critical Vulnerabilities: 0
-```
-
-## 7. Deployment
-
-Old container is removed and new version is deployed automatically.
-
-Container:
-
-```
-springboot-app
-```
-
-Application Port:
-
-```
-8081 → 8080
-```
-
-Health Check:
-
-```
-/actuator/health
-```
-
-Response:
-
-```json
-{
- "status":"UP"
-}
-```
+| Tool | Purpose |
+|-------|----------|
+| Prometheus | Metrics Collection |
+| Grafana | Dashboard |
+| Alertmanager | Alerts |
 
 ---
 
-# ✅ Completed Features
+# 🔒 Security
 
-✔ Spring Boot Application
-✔ Docker Containerization
-✔ Jenkins CI/CD Pipeline
-✔ Automated Maven Build
-✔ SonarQube Integration
-✔ Quality Gate Validation
-✔ Docker Image Creation
-✔ Trivy Security Scanning
-✔ Automated Deployment
-✔ Container Health Check
+The pipeline performs:
+
+- Static Code Analysis
+- Docker Image Scanning
+- Vulnerability Detection
+- Quality Gate Validation
 
 ---
 
-# 📊 Project Status
+# 📸 Screenshots
 
-```
-BUILD       ✅ SUCCESS
-SONAR       ✅ PASS
-SECURITY    ✅ CLEAN
-DEPLOYMENT  ✅ SUCCESS
-```
+Add screenshots of:
+
+- Jenkins Dashboard
+- Successful Pipeline
+- SonarQube Dashboard
+- Docker Hub Repository
+- Grafana Dashboard
+- Prometheus Targets
+- Running Application
 
 ---
 
-# 🔮 Future Enhancements
+# 📈 Features
 
-* Docker Hub / AWS ECR Image Push
-* Jenkins Webhook Automation
-* Nginx Reverse Proxy
-* SSL Certificate Setup
-* Prometheus Monitoring
-* Grafana Dashboard
-* Kubernetes Deployment
-* Terraform Infrastructure Automation
+- End-to-End CI/CD
+- Automated Build
+- Automated Testing Ready
+- Code Quality Analysis
+- Docker Image Creation
+- Docker Hub Integration
+- Security Scanning
+- Automated Deployment
+- Monitoring
+- Alerting
+
+---
+
+# 🎯 Future Enhancements
+
+- Kubernetes Deployment
+- Helm Charts
+- ArgoCD GitOps
+- Terraform
+- AWS EKS
+- GitHub Actions
+- Nexus Repository
+- Blue-Green Deployment
+- JaCoCo Code Coverage
+- OWASP Dependency Check
 
 ---
 
@@ -299,4 +293,16 @@ DEPLOYMENT  ✅ SUCCESS
 
 **Pratap Kumar Sahoo**
 
-DevOps CI/CD Practice Project 🚀
+GitHub:
+https://github.com/Pratapkumara
+
+Docker Hub:
+https://hub.docker.com/u/pratapkumar1
+
+---
+
+# ⭐ If you like this project
+
+Give this repository a ⭐ on GitHub.
+
+---
